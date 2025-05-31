@@ -5,6 +5,7 @@ use bevy_ecs_tilemap::TilemapPlugin;
 use tilemap::helpers::tiled::TiledMap;
 use tilemap::swap_texture_or_hide;
 
+mod cursed_mouse_input;
 mod tilemap;
 
 fn main() {
@@ -27,27 +28,20 @@ fn main() {
         .add_systems(Startup, tilemap::setup)
         //.add_systems(Update, helpers::camera::movement)
         .add_systems(Update, swap_texture_or_hide)
+        .add_systems(Update, cursed_mouse_input::player_movement)
         .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2d);
     commands.spawn((
-        Transform::from_xyz(20.0, 0.0, 0.0),
+        Transform::from_xyz(20.0, 0.0, 0.0).with_scale(Vec3::ONE * 0.1),
         Sprite {
             image: asset_server.load("ducky.png"),
             ..Default::default()
         },
+        ExternalImpulse::ZERO,
         RigidBody::Dynamic,
         Collider::circle(10.0),
-    ));
-    commands.spawn((
-        Transform::from_xyz(0.0, -300.0, 0.0),
-        Sprite {
-            image: asset_server.load("ducky.png"),
-            ..Default::default()
-        },
-        RigidBody::Static,
-        Collider::circle(100.0),
     ));
 }

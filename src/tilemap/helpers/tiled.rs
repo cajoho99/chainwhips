@@ -16,7 +16,10 @@ use std::io::{Cursor, ErrorKind};
 use std::path::Path;
 use std::sync::Arc;
 
+use avian2d::prelude::{Collider, RigidBody};
+use bevy::asset::AssetServer;
 use bevy::log::{info, warn};
+use bevy::math::Vec2;
 use bevy::{
     asset::{AssetLoader, AssetPath, io::Reader},
     platform::collections::HashMap,
@@ -210,6 +213,7 @@ pub fn process_loaded_maps(
         &TilemapRenderSettings,
     )>,
     new_maps: Query<&TiledMapHandle, Added<TiledMapHandle>>,
+    asset_server: Res<AssetServer>,
 ) {
     let mut changed_maps = Vec::<AssetId<TiledMap>>::default();
     for event in map_events.read() {
@@ -302,6 +306,12 @@ pub fn process_loaded_maps(
                             y: tiled_map.map.height,
                         };
 
+                        // Top-left of the tilemap in world space.
+                        let tilemap_origin = Vec2::new(
+                            map_size.x as f32 * tile_size.x / -2.0,
+                            map_size.y as f32 * tile_size.y / -2.0,
+                        );
+
                         let grid_size = TilemapGridSize {
                             x: tiled_map.map.tile_width as f32,
                             y: tiled_map.map.tile_height as f32,
@@ -360,17 +370,32 @@ pub fn process_loaded_maps(
 
                                 let tile_pos = TilePos { x, y };
                                 let tile_entity = commands
-                                    .spawn(TileBundle {
-                                        position: tile_pos,
-                                        tilemap_id: TilemapId(layer_entity),
-                                        texture_index: TileTextureIndex(texture_index),
-                                        flip: TileFlip {
-                                            x: layer_tile_data.flip_h,
-                                            y: layer_tile_data.flip_v,
-                                            d: layer_tile_data.flip_d,
+                                    .spawn((
+                                        RigidBody::Static,
+                                        Transform::from_xyz(
+                                            x as f32 * tile_size.x + tilemap_origin.x,
+                                            y as f32 * tile_size.y + tilemap_origin.y,
+                                            0.0,
+                                        ),
+                                        // TODO: is this the right size?
+                                        Collider::rectangle(tile_size.x, tile_size.y),
+                                        TileBundle {
+                                            position: tile_pos,
+                                            tilemap_id: TilemapId(layer_entity),
+                                            texture_index: TileTextureIndex(texture_index),
+                                            flip: TileFlip {
+                                                x: layer_tile_data.flip_h,
+                                                y: layer_tile_data.flip_v,
+                                                d: layer_tile_data.flip_d,
+                                            },
+                                            ..Default::default()
                                         },
-                                        ..Default::default()
-                                    })
+                                        // debugging
+                                        //bevy::sprite::Sprite {
+                                        //    image: asset_server.load("ducky.png"),
+                                        //    ..Default::default()
+                                        //},
+                                    ))
                                     .id();
                                 tile_storage.set(&tile_pos, tile_entity);
                             }
@@ -399,3 +424,4 @@ pub fn process_loaded_maps(
         }
     }
 }
+
