@@ -1,8 +1,9 @@
 use std::time::Duration;
 
 use avian2d::prelude::*;
-use bevy::asset::AssetMetaCheck;
+use bevy::input::gamepad::GamepadConnectionEvent;
 use bevy::prelude::*;
+use bevy::{asset::AssetMetaCheck, input::gamepad::GamepadEvent};
 use bevy_ecs_tilemap::TilemapPlugin;
 use delete_after::{DeleteAt, delete_at};
 use input::controls;
@@ -72,6 +73,7 @@ fn main() {
         .add_systems(Update, camera_follow_player)
         .add_systems(Update, delete_at)
         .add_systems(Update, chainControll)
+        .add_systems(Update, spawn_player_on_gamepad_connect)
         .run();
 }
 
@@ -105,7 +107,25 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         PlaybackSettings::LOOP,
     ));
 
-    // Player
+    // Keyboard
+    spawn_player(&mut commands, &asset_server);
+}
+
+fn spawn_player_on_gamepad_connect(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut event_reader: EventReader<GamepadEvent>,
+) {
+    for event in event_reader.read() {
+        if let GamepadEvent::Connection(event) = event {
+            if event.connected() {
+                spawn_player(&mut commands, &asset_server);
+            }
+        }
+    }
+}
+
+fn spawn_player(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     let player = commands
         .spawn((
             Transform::from_xyz(20.0, 0.1, 0.0),
@@ -124,11 +144,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             TnuaAvian2dSensorShape(Collider::rectangle(31.0, 31.0)),
         ))
         .id();
-
-    spawn_chain(player, commands, asset_server);
+    spawn_chain(player, commands, &asset_server);
 }
 
-fn spawn_chain(player: Entity, mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_chain(player: Entity, commands: &mut Commands, asset_server: &Res<AssetServer>) {
     let mut chain_link = vec![
         commands
             .spawn((
