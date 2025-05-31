@@ -57,4 +57,17 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Collider::circle(10.0 / player_scale),
         Mass(1.0), // TODO
     ));
+
+    commands.spawn((
+        Transform::from_xyz(20.0, 0.1, 0.0).with_scale(Vec3::ONE * 0.1),
+        Sprite {
+            image: asset_server.load("character.png"),
+            custom_size: Some(Vec2::new(1000.0, 1000.0)),
+            ..Default::default()
+        },
+        ExternalImpulse::ZERO,
+        RigidBody::Dynamic,
+        Collider::rectangle(100.0, 100.0),
+        ColliderDensity(0.01),
+    ));
 }
