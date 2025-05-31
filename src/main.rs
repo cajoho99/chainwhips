@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::TilemapPlugin;
 use input::{gamepad_system, keyboard_and_mouse_system};
 use tilemap::helpers::tiled::TiledMap;
-use tilemap::swap_texture_or_hide;
 
 mod cursed_mouse_input;
 mod input;
@@ -32,14 +31,7 @@ fn main() {
         .add_plugins(tilemap::helpers::tiled::TiledMapPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, tilemap::setup)
-        .add_systems(
-            Update,
-            (
-                swap_texture_or_hide,
-                gamepad_system,
-                keyboard_and_mouse_system,
-            ),
-        )
+        .add_systems(Update, (gamepad_system, keyboard_and_mouse_system))
         .run();
 }
 

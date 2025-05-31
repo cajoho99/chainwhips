@@ -40,9 +40,20 @@ pub fn keyboard_and_mouse_system(
         info!("mouse moved ({}, {})", delta.x, delta.y);
     }
 
+    let move_factor = 50.0;
+    let jump_factor = 100.0;
+
     for mut impulse in players {
         if keyboard_input.pressed(KeyCode::KeyA) {
-            impulse.apply_impulse(Vec2::new(-1.0, 0.0) * 200.0);
+            impulse.apply_impulse(Vec2::new(-1.0, 0.0) * move_factor);
+        }
+
+        if keyboard_input.pressed(KeyCode::KeyD) {
+            impulse.apply_impulse(Vec2::new(1.0, 0.0) * move_factor);
+        }
+
+        if keyboard_input.pressed(KeyCode::Space) {
+            impulse.apply_impulse(Vec2::new(0.0, 1.0) * jump_factor);
         }
     }
 }

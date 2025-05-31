@@ -78,29 +78,3 @@ pub fn setup_test(
         });
     }
 }
-
-pub fn swap_texture_or_hide(
-    asset_server: Res<AssetServer>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut TilemapTexture, &mut Visibility)>,
-) {
-    if keyboard_input.just_pressed(KeyCode::Space) {
-        let texture_a = TilemapTexture::Single(asset_server.load("tiles.png"));
-        let texture_b = TilemapTexture::Single(asset_server.load("tiles2.png"));
-        for (mut tilemap_tex, _) in &mut query {
-            if *tilemap_tex == texture_a {
-                *tilemap_tex = texture_b.clone();
-            } else {
-                *tilemap_tex = texture_a.clone();
-            }
-        }
-    }
-    if keyboard_input.just_pressed(KeyCode::KeyH) {
-        for (_, mut visibility) in &mut query {
-            *visibility = match *visibility {
-                Visibility::Inherited | Visibility::Visible => Visibility::Hidden,
-                Visibility::Hidden => Visibility::Visible,
-            };
-        }
-    }
-}
