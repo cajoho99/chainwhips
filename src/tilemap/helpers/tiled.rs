@@ -308,8 +308,8 @@ pub fn process_loaded_maps(
 
                         // Top-left of the tilemap in world space.
                         let tilemap_origin = Vec2::new(
-                            map_size.x as f32 * tile_size.x / -2.0,
-                            map_size.y as f32 * tile_size.y / -2.0,
+                            (map_size.x as f32 * tile_size.x - tile_size.x) / -2.0,
+                            (map_size.y as f32 * tile_size.y - tile_size.y) / -2.0,
                         );
 
                         let grid_size = TilemapGridSize {
@@ -390,7 +390,6 @@ pub fn process_loaded_maps(
                                             },
                                             ..Default::default()
                                         },
-                                        // debugging
                                         //bevy::sprite::Sprite {
                                         //    image: asset_server.load("ducky.png"),
                                         //    ..Default::default()
@@ -424,4 +423,3 @@ pub fn process_loaded_maps(
         }
     }
 }
-

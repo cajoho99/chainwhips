@@ -21,6 +21,7 @@ fn main() {
                 ..default()
             }),
             PhysicsPlugins::default(),
+            //PhysicsDebugPlugin::default(),
         ))
         .init_asset::<TiledMap>()
         .insert_resource(Gravity(Vec2::NEG_Y * 980.0))
@@ -43,14 +44,17 @@ fn main() {
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2d);
+
+    let player_scale = 0.1;
     commands.spawn((
-        Transform::from_xyz(20.0, 0.0, 0.0).with_scale(Vec3::ONE * 0.1),
+        Transform::from_xyz(20.0, 0.0, 0.0).with_scale(Vec3::ONE * player_scale),
         Sprite {
             image: asset_server.load("ducky.png"),
             ..Default::default()
         },
         ExternalImpulse::ZERO,
         RigidBody::Dynamic,
-        Collider::circle(10.0),
+        Collider::circle(10.0 / player_scale),
+        Mass(1.0), // TODO
     ));
 }
