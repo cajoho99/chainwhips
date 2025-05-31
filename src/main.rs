@@ -145,15 +145,24 @@ fn camera_follow_player(
     cameras: Query<&mut Transform, (With<Camera2d>, Without<Player>)>,
     _time: Res<Time>,
 ) {
-    if let Some(player) = players.into_iter().next() {
-        for mut camera in cameras {
-            camera.translation = player.translation;
+    let mut min = Vec2::INFINITY;
+    let mut max = Vec2::NEG_INFINITY;
 
-            //const LERP_SPEED: f32 = 10.0;
-            //camera.translation = camera
-            //    .translation
-            //    .lerp(player.translation, time.delta().as_secs_f32() * LERP_SPEED);
-        }
+    for player in players {
+        min = min.min(player.translation.xy());
+        max = max.max(player.translation.xy());
+    }
+
+    let center = (min + max) / 2.0;
+
+    for mut camera in cameras {
+        camera.translation.x = center.x;
+        camera.translation.y = center.y;
+
+        //const LERP_SPEED: f32 = 10.0;
+        //camera.translation = camera
+        //    .translation
+        //    .lerp(player.translation, time.delta().as_secs_f32() * LERP_SPEED);
     }
 }
 
