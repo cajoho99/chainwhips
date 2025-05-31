@@ -71,7 +71,14 @@ fn main() {
         )
         .add_systems(Update, camera_follow_player)
         .add_systems(Update, delete_at)
+        .add_systems(Update, chainControll)
         .run();
+}
+
+fn chainControll(chainBases: Query<(&mut RevoluteJoint, &ChainBase)>) {
+    for (mut joint, base) in chainBases {
+        joint.local_anchor1 = base.getPos();
+    }
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {

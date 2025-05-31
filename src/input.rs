@@ -10,6 +10,7 @@ pub fn controls(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut TnuaController>,
     mut gamepads: Query<&Gamepad>,
+    mut base: Query<&mut ChainBase>,
 ) {
     let Ok(mut controller) = query.single_mut() else {
         return;
@@ -25,6 +26,12 @@ pub fn controls(
         }
         if gamepad.pressed(GamepadButton::DPadUp) {
             jump(&mut controller);
+        }
+        if gamepad.right_stick().x > 0.8 {
+            base.iter_mut().for_each(|mut base| base.moveRight());
+        }
+        if gamepad.right_stick().x < -0.8 {
+            base.iter_mut().for_each(|mut base| base.moveLeft());
         }
     } else {
         if keyboard.pressed(KeyCode::KeyA) {
