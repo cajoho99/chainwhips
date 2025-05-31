@@ -10,6 +10,7 @@ mod input;
 mod tilemap;
 
 const GRAVITY: f32 = 980.0;
+const CHAIN_LINK_COUNT: usize = 15;
 
 #[derive(Component)]
 pub struct Player;
@@ -63,55 +64,60 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     // Player
-    commands.spawn((
-        Transform::from_xyz(20.0, 0.1, 0.0).with_scale(Vec3::ONE * 0.1),
-        Sprite {
-            image: asset_server.load("character.png"),
-            custom_size: Some(Vec2::new(1000.0, 1000.0)),
-            ..Default::default()
-        },
-        ExternalImpulse::ZERO,
-        RigidBody::Dynamic,
-        Collider::rectangle(550.0, 550.0),
-        LockedAxes::ROTATION_LOCKED,
-        Mass(1.0),
-        Player,
-    ));
+    let player = commands
+        .spawn((
+            Transform::from_xyz(20.0, 0.1, 0.0).with_scale(Vec3::ONE * 0.1),
+            Sprite {
+                image: asset_server.load("character.png"),
+                custom_size: Some(Vec2::new(1000.0, 1000.0)),
+                ..Default::default()
+            },
+            ExternalImpulse::ZERO,
+            RigidBody::Dynamic,
+            Collider::rectangle(550.0, 550.0),
+            LockedAxes::ROTATION_LOCKED,
+            Mass(1.0),
+            Player,
+        ))
+        .id();
 
-    spawn_chain(commands, asset_server);
+    spawn_chain(player, commands, asset_server);
 }
 
-fn spawn_chain(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let e1 = commands
-        .spawn((
-            Transform::from_xyz(21.0, 3.1, 0.0).with_scale(Vec3::ONE * 0.1),
-            RigidBody::Dynamic,
-            ExternalImpulse::ZERO,
-            Collider::capsule(75.0, 80.0),
-            Sprite {
-                image: asset_server.load("chain.png"),
-                custom_size: Some(Vec2::new(100.0, 200.0)),
-                ..Default::default()
-            },
-        ))
-        .id();
-    let e2 = commands
-        .spawn((
-            Transform::from_xyz(21.0, 80.2, 0.0).with_scale(Vec3::ONE * 0.1),
-            ExternalImpulse::ZERO,
-            RigidBody::Dynamic,
-            Collider::capsule(75.0, 80.0),
-            Sprite {
-                image: asset_server.load("chain.png"),
-                custom_size: Some(Vec2::new(100.0, 200.0)),
-                ..Default::default()
-            },
-        ))
-        .id();
+fn spawn_chain(player: Entity, mut commands: Commands, asset_server: Res<AssetServer>) {
+    let mut chain_link = Vec::new();
+    for i in 0..CHAIN_LINK_COUNT {
+        chain_link.push(
+            commands
+                .spawn((
+                    Transform::from_xyz(21.0, i as f32 + 500.1, 0.0).with_scale(Vec3::ONE * 0.1),
+                    RigidBody::Dynamic,
+                    ExternalImpulse::ZERO,
+                    Collider::capsule(75.0, 80.0),
+                    Sprite {
+                        image: asset_server.load("chain.png"),
+                        custom_size: Some(Vec2::new(100.0, 200.0)),
+                        ..Default::default()
+                    },
+                    Mass(0.001),
+                ))
+                .id(),
+        );
+    }
+
+    for i in 0..(CHAIN_LINK_COUNT - 1) {
+        let c1 = chain_link[i];
+        let c2 = chain_link[i + 1];
+        commands.spawn(
+            RevoluteJoint::new(c1, c2)
+                .with_local_anchor_1(Vec2::new(0.0, -10.0))
+                .with_local_anchor_2(Vec2::new(0.0, 10.0)),
+        );
+    }
 
     commands.spawn(
-        RevoluteJoint::new(e1, e2)
-            .with_local_anchor_1(Vec2::new(0.0, -10.0))
+        RevoluteJoint::new(player, chain_link[0])
+            .with_local_anchor_1(Vec2::new(0.0, 50.0))
             .with_local_anchor_2(Vec2::new(0.0, 10.0)),
     );
 }
