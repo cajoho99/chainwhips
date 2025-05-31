@@ -110,7 +110,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         .spawn((
             Transform::from_xyz(20.0, 0.1, 0.0),
             Sprite {
-                image: asset_server.load("character.png"),
+                image: asset_server.load("character2.png"),
+                custom_size: Some(Vec2::new(64.0, 64.0)),
                 ..Default::default()
             },
             RigidBody::Dynamic,
