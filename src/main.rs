@@ -2,10 +2,12 @@ use avian2d::prelude::*;
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::TilemapPlugin;
+use input::{gamepad_system, keyboard_and_mouse_system};
 use tilemap::helpers::tiled::TiledMap;
 use tilemap::swap_texture_or_hide;
 
 mod cursed_mouse_input;
+mod input;
 mod tilemap;
 
 fn main() {
@@ -27,8 +29,15 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(Startup, tilemap::setup)
         //.add_systems(Update, helpers::camera::movement)
-        .add_systems(Update, swap_texture_or_hide)
         .add_systems(Update, cursed_mouse_input::player_movement)
+        .add_systems(
+            Update,
+            (
+                swap_texture_or_hide,
+                gamepad_system,
+                keyboard_and_mouse_system,
+            ),
+        )
         .run();
 }
 
