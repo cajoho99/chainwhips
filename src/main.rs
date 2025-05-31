@@ -1,6 +1,10 @@
 use avian2d::prelude::*;
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
+use bevy_ecs_tilemap::TilemapPlugin;
+use tilemap::swap_texture_or_hide;
+
+mod tilemap;
 
 fn main() {
     App::new()
@@ -15,7 +19,11 @@ fn main() {
             PhysicsPlugins::default(),
         ))
         .insert_resource(Gravity(Vec2::NEG_Y * 980.0))
+        .add_plugins(TilemapPlugin)
         .add_systems(Startup, setup)
+        .add_systems(Startup, tilemap::setup)
+        //.add_systems(Update, helpers::camera::movement)
+        .add_systems(Update, swap_texture_or_hide)
         .run();
 }
 
