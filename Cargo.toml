@@ -21,6 +21,8 @@ atlas = ["bevy_ecs_tilemap/atlas"]
 [dependencies]
 avian2d = "0.3.0"
 bevy = { version = "0.16", features = ["vorbis"] }
+bevy-tnua = "0.24.0"
+bevy-tnua-avian2d = "0.5.0"
 bevy_ecs_tilemap = { version = "0.16.0" }
 thiserror = "2.0.12"
 tiled = "0.14.0"

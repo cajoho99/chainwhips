@@ -2,8 +2,11 @@ use avian2d::prelude::*;
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::TilemapPlugin;
-use input::{gamepad_system, keyboard_and_mouse_system};
+use input::{gamepad_system, key_controls, keyboard_and_mouse_system};
 use tilemap::helpers::tiled::TiledMap;
+
+use bevy_tnua::prelude::*;
+use bevy_tnua_avian2d::*;
 
 mod cursed_mouse_input;
 mod input;
@@ -26,7 +29,9 @@ fn main() {
                 ..default()
             }),
             PhysicsPlugins::default(),
-            //PhysicsDebugPlugin::default(),
+            PhysicsDebugPlugin::default(),
+            TnuaControllerPlugin::new(FixedUpdate),
+            TnuaAvian2dPlugin::new(FixedUpdate),
         ))
         .init_asset::<TiledMap>()
         .insert_resource(Gravity(Vec2::NEG_Y * GRAVITY))
@@ -34,7 +39,7 @@ fn main() {
         .add_plugins(tilemap::helpers::tiled::TiledMapPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, tilemap::setup)
-        .add_systems(Update, (gamepad_system, keyboard_and_mouse_system))
+        .add_systems(FixedUpdate, key_controls.in_set(TnuaUserControlsSystemSet))
         .add_systems(Update, camera_follow_player)
         .run();
 }
@@ -66,18 +71,19 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Player
     let player = commands
         .spawn((
-            Transform::from_xyz(20.0, 0.1, 0.0).with_scale(Vec3::ONE * 0.1),
+            Transform::from_xyz(20.0, 0.1, 0.0),
             Sprite {
                 image: asset_server.load("character.png"),
-                custom_size: Some(Vec2::new(1000.0, 1000.0)),
                 ..Default::default()
             },
-            ExternalImpulse::ZERO,
             RigidBody::Dynamic,
-            Collider::rectangle(550.0, 550.0),
+            Collider::capsule(32.0, 0.0),
+            Friction::new(0.2),
             LockedAxes::ROTATION_LOCKED,
-            Mass(1.0),
             Player,
+            TnuaController::default(),
+            // A sensor shape is not strictly necessary, but without it we'll get weird results.
+            TnuaAvian2dSensorShape(Collider::rectangle(31.0, 31.0)),
         ))
         .id();
 

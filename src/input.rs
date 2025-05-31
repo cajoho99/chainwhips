@@ -1,5 +1,6 @@
 use avian2d::prelude::ExternalImpulse;
 use bevy::{input::mouse::AccumulatedMouseMotion, prelude::*};
+use bevy_tnua::prelude::{TnuaBuiltinJump, TnuaBuiltinWalk, TnuaController};
 
 use crate::Player;
 
@@ -41,7 +42,7 @@ pub fn keyboard_and_mouse_system(
     }
 
     let move_factor = 50.0;
-    let jump_factor = 100.0;
+    let jump_factor = 400.0;
 
     for mut impulse in players {
         if keyboard_input.pressed(KeyCode::KeyA) {
@@ -52,8 +53,50 @@ pub fn keyboard_and_mouse_system(
             impulse.apply_impulse(Vec2::new(1.0, 0.0) * move_factor);
         }
 
-        if keyboard_input.pressed(KeyCode::Space) {
+        if keyboard_input.just_pressed(KeyCode::Space) {
             impulse.apply_impulse(Vec2::new(0.0, 1.0) * jump_factor);
         }
+    }
+}
+
+pub fn key_controls(keyboard: Res<ButtonInput<KeyCode>>, mut query: Query<&mut TnuaController>) {
+    let Ok(mut controller) = query.single_mut() else {
+        return;
+    };
+
+    let mut direction = Vec3::ZERO;
+
+    if keyboard.pressed(KeyCode::KeyA) {
+        direction -= Vec3::X;
+    }
+    if keyboard.pressed(KeyCode::KeyD) {
+        direction += Vec3::X;
+    }
+
+    // Feed the basis every frame. Even if the player doesn't move - just use `desired_velocity:
+    // Vec3::ZERO`. `TnuaController` starts without a basis, which will make the character collider
+    // just fall.
+    controller.basis(TnuaBuiltinWalk {
+        // The `desired_velocity` determines how the character will move.
+        desired_velocity: direction.normalize_or_zero() * 4000.0,
+        // The `float_height` must be greater (even if by little) from the distance between the
+        // character's center and the lowest point of its collider.
+        float_height: 17.0,
+        acceleration: 600.0,
+        air_acceleration: 600.0,
+        // `TnuaBuiltinWalk` has many other fields for customizing the movement - but they have
+        // sensible defaults. Refer to the `TnuaBuiltinWalk`'s documentation to learn what they do.
+        ..Default::default()
+    });
+
+    // Feed the jump action every frame as long as the player holds the jump button. If the player
+    // stops holding the jump button, simply stop feeding the action.
+    if keyboard.pressed(KeyCode::Space) {
+        controller.action(TnuaBuiltinJump {
+            // The height is the only mandatory field of the jump button.
+            height: 32.0 * 10.0,
+            // `TnuaBuiltinJump` also has customization fields with sensible defaults.
+            ..Default::default()
+        });
     }
 }
