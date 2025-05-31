@@ -10,6 +10,9 @@ mod cursed_mouse_input;
 mod input;
 mod tilemap;
 
+#[derive(Component)]
+pub struct Player;
+
 fn main() {
     App::new()
         .add_plugins((
@@ -29,8 +32,6 @@ fn main() {
         .add_plugins(tilemap::helpers::tiled::TiledMapPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, tilemap::setup)
-        //.add_systems(Update, helpers::camera::movement)
-        .add_systems(Update, cursed_mouse_input::player_movement)
         .add_systems(
             Update,
             (
@@ -70,5 +71,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Collider::rectangle(100.0, 100.0),
         ColliderDensity(0.01),
         LockedAxes::ROTATION_LOCKED,
+        Player,
     ));
 }

@@ -1,4 +1,7 @@
+use avian2d::prelude::ExternalImpulse;
 use bevy::{input::mouse::AccumulatedMouseMotion, prelude::*};
+
+use crate::Player;
 
 pub fn gamepad_system(gamepads: Query<(Entity, &Gamepad)>) {
     for (entity, gamepad) in &gamepads {
@@ -23,20 +26,23 @@ pub fn gamepad_system(gamepads: Query<(Entity, &Gamepad)>) {
 pub fn keyboard_and_mouse_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mouse_input: Res<AccumulatedMouseMotion>,
+    players: Query<&mut ExternalImpulse, With<Player>>,
 ) {
-    if keyboard_input.pressed(KeyCode::KeyA) {
-        info!("'A' currently pressed");
-    }
-
-    if keyboard_input.just_pressed(KeyCode::KeyA) {
-        info!("'A' just pressed");
-    }
-    if keyboard_input.just_released(KeyCode::KeyA) {
-        info!("'A' just released");
-    }
+    // if keyboard_input.just_pressed(KeyCode::KeyA) {
+    //     info!("'A' just pressed");
+    // }
+    // if keyboard_input.just_released(KeyCode::KeyA) {
+    //     info!("'A' just released");
+    // }
 
     if mouse_input.delta != Vec2::ZERO {
         let delta = mouse_input.delta;
         info!("mouse moved ({}, {})", delta.x, delta.y);
+    }
+
+    for mut impulse in players {
+        if keyboard_input.pressed(KeyCode::KeyA) {
+            impulse.apply_impulse(Vec2::new(-1.0, 0.0) * 200.0);
+        }
     }
 }
