@@ -39,7 +39,7 @@ impl ChainBase {
     }
     pub fn getPos(self) -> Vec2 {
         let orig = Vec2::new(0.0, 35.0);
-        let new = orig + Vec2::new(self.pos * 25.0, -15.0 * f32::abs(self.pos));
+        let new = orig + Vec2::new(self.pos * 35.0, -15.0 * f32::abs(self.pos));
         new
     }
 }
