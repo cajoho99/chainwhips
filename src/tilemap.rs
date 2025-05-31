@@ -10,7 +10,7 @@ pub fn setup(
         ArrayTextureLoader,
     >,
 ) {
-    commands.spawn(Camera2d);
+    let map_handle = helpers::tiled::TiledMapHandle(asset_server.load("The Map.tmx"));
 
     let texture_handle: Handle<Image> = asset_server.load("tiles.png");
 

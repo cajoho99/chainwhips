@@ -1,0 +1,24 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "Industrial Zone.tsx": {
+            "dynamicWrapping": true
+        }
+    },
+    "last.imagePath": "/home/hulthe/proj/chainwhips/assets/tileset/1 Tiles",
+    "map.lastUsedFormat": "tmx",
+    "map.width": 60,
+    "openFiles": [
+    ],
+    "project": "map.tiled-project",
+    "recentFiles": [
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.type": 1
+}
