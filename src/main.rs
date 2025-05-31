@@ -38,8 +38,8 @@ impl ChainBase {
         self.pos = f32::min(1.0, self.pos + 0.1);
     }
     pub fn getPos(self) -> Vec2 {
-        let orig = Vec2::new(0.0, 50.0);
-        let new = orig + Vec2::new(self.pos * 50.0, -10.0 * f32::abs(self.pos));
+        let orig = Vec2::new(0.0, 35.0);
+        let new = orig + Vec2::new(self.pos * 20.0, -15.0 * f32::abs(self.pos));
         new
     }
 }
