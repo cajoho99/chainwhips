@@ -69,5 +69,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         RigidBody::Dynamic,
         Collider::rectangle(100.0, 100.0),
         ColliderDensity(0.01),
+        LockedAxes::ROTATION_LOCKED,
     ));
 }
