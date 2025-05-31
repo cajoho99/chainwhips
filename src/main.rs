@@ -5,7 +5,7 @@ use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::TilemapPlugin;
 use delete_after::{DeleteAt, delete_at};
-use input::{gamepad_system, key_controls, keyboard_and_mouse_system};
+use input::controls;
 use tilemap::helpers::tiled::TiledMap;
 
 use bevy_tnua::prelude::*;
@@ -67,7 +67,7 @@ fn main() {
         .add_systems(Startup, tilemap::setup)
         .add_systems(
             FixedUpdate,
-            (key_controls.in_set(TnuaUserControlsSystemSet), woosh_chain),
+            (controls.in_set(TnuaUserControlsSystemSet), woosh_chain),
         )
         .add_systems(Update, camera_follow_player)
         .add_systems(Update, delete_at)
