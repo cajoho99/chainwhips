@@ -72,11 +72,48 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         ExternalImpulse::ZERO,
         RigidBody::Dynamic,
-        Collider::rectangle(100.0, 100.0),
-        ColliderDensity(0.01),
+        Collider::rectangle(550.0, 550.0),
         LockedAxes::ROTATION_LOCKED,
+        Mass(1.0),
         Player,
     ));
+
+    spawn_chain(commands, asset_server);
+}
+
+fn spawn_chain(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let e1 = commands
+        .spawn((
+            Transform::from_xyz(21.0, 3.1, 0.0).with_scale(Vec3::ONE * 0.1),
+            RigidBody::Dynamic,
+            ExternalImpulse::ZERO,
+            Collider::capsule(75.0, 80.0),
+            Sprite {
+                image: asset_server.load("chain.png"),
+                custom_size: Some(Vec2::new(100.0, 200.0)),
+                ..Default::default()
+            },
+        ))
+        .id();
+    let e2 = commands
+        .spawn((
+            Transform::from_xyz(21.0, 80.2, 0.0).with_scale(Vec3::ONE * 0.1),
+            ExternalImpulse::ZERO,
+            RigidBody::Dynamic,
+            Collider::capsule(75.0, 80.0),
+            Sprite {
+                image: asset_server.load("chain.png"),
+                custom_size: Some(Vec2::new(100.0, 200.0)),
+                ..Default::default()
+            },
+        ))
+        .id();
+
+    commands.spawn(
+        RevoluteJoint::new(e1, e2)
+            .with_local_anchor_1(Vec2::new(0.0, -10.0))
+            .with_local_anchor_2(Vec2::new(0.0, 10.0)),
+    );
 }
 
 fn camera_follow_player(
