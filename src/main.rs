@@ -22,6 +22,7 @@ fn main() {
         .init_asset::<TiledMap>()
         .insert_resource(Gravity(Vec2::NEG_Y * 980.0))
         .add_plugins(TilemapPlugin)
+        .add_plugins(tilemap::helpers::tiled::TiledMapPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, tilemap::setup)
         //.add_systems(Update, helpers::camera::movement)

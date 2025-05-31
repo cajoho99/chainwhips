@@ -11,12 +11,15 @@
             "dynamicWrapping": true
         }
     },
+    "last.exportedFilePath": "/home/hulthe/proj/chainwhips/assets",
     "last.imagePath": "/home/hulthe/proj/chainwhips/assets/tileset/1 Tiles",
+    "map.lastUsedExportFilter": "Tiled map files (*.tmx *.xml)",
     "map.lastUsedFormat": "tmx",
     "map.width": 60,
     "openFiles": [
     ],
     "project": "map.tiled-project",
+    "property.type": "int",
     "recentFiles": [
     ],
     "tileset.lastUsedFormat": "tsx",

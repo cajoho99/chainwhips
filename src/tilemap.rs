@@ -3,15 +3,22 @@ use bevy_ecs_tilemap::prelude::*;
 
 pub mod helpers;
 
-pub fn setup(
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let map_handle = helpers::tiled::TiledMapHandle(asset_server.load("The Map.tmx"));
+
+    commands.spawn(helpers::tiled::TiledMapBundle {
+        tiled_map: map_handle,
+        ..Default::default()
+    });
+}
+
+pub fn setup_test(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     #[cfg(all(not(feature = "atlas"), feature = "render"))] array_texture_loader: Res<
         ArrayTextureLoader,
     >,
 ) {
-    let map_handle = helpers::tiled::TiledMapHandle(asset_server.load("The Map.tmx"));
-
     let texture_handle: Handle<Image> = asset_server.load("tiles.png");
 
     let map_size = TilemapSize { x: 32, y: 32 };
