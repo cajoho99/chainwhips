@@ -39,7 +39,7 @@ impl ChainBase {
     }
     pub fn getPos(self) -> Vec2 {
         let orig = Vec2::new(0.0, 35.0);
-        let new = orig + Vec2::new(self.pos * 40.0, -20.0 * f32::abs(self.pos));
+        let new = orig + Vec2::new(self.pos * 35.0, -25.0 * f32::abs(self.pos));
         new
     }
 }
@@ -140,7 +140,7 @@ fn spawn_chain(player: Entity, mut commands: Commands, asset_server: Res<AssetSe
                     custom_size: Some(Vec2::new(100.0, 200.0)),
                     ..Default::default()
                 },
-                Mass(0.001),
+                Mass(0.0005),
             ))
             .id(),
     ];
@@ -158,7 +158,7 @@ fn spawn_chain(player: Entity, mut commands: Commands, asset_server: Res<AssetSe
                         custom_size: Some(Vec2::new(100.0, 200.0)),
                         ..Default::default()
                     },
-                    Mass(0.001),
+                    Mass(0.0005),
                 ))
                 .id(),
         );
