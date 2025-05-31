@@ -1,7 +1,10 @@
+use std::time::Duration;
+
 use avian2d::prelude::*;
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::TilemapPlugin;
+use delete_after::{DeleteAt, delete_at};
 use input::{gamepad_system, key_controls, keyboard_and_mouse_system};
 use tilemap::helpers::tiled::TiledMap;
 
@@ -9,6 +12,7 @@ use bevy_tnua::prelude::*;
 use bevy_tnua_avian2d::*;
 
 mod cursed_mouse_input;
+mod delete_after;
 mod input;
 mod tilemap;
 
@@ -17,6 +21,9 @@ const CHAIN_LINK_COUNT: usize = 15;
 
 #[derive(Component)]
 pub struct Player;
+
+#[derive(Component)]
+pub struct ChainLink;
 
 fn main() {
     App::new()
@@ -29,7 +36,7 @@ fn main() {
                 ..default()
             }),
             PhysicsPlugins::default(),
-            PhysicsDebugPlugin::default(),
+            //PhysicsDebugPlugin::default(),
             TnuaControllerPlugin::new(FixedUpdate),
             TnuaAvian2dPlugin::new(FixedUpdate),
         ))
@@ -39,8 +46,12 @@ fn main() {
         .add_plugins(tilemap::helpers::tiled::TiledMapPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, tilemap::setup)
-        .add_systems(FixedUpdate, key_controls.in_set(TnuaUserControlsSystemSet))
+        .add_systems(
+            FixedUpdate,
+            (key_controls.in_set(TnuaUserControlsSystemSet), woosh_chain),
+        )
         .add_systems(Update, camera_follow_player)
+        .add_systems(Update, delete_at)
         .run();
 }
 
@@ -96,6 +107,7 @@ fn spawn_chain(player: Entity, mut commands: Commands, asset_server: Res<AssetSe
         chain_link.push(
             commands
                 .spawn((
+                    ChainLink,
                     Transform::from_xyz(21.0, i as f32 + 500.1, 0.0).with_scale(Vec3::ONE * 0.1),
                     RigidBody::Dynamic,
                     ExternalImpulse::ZERO,
@@ -141,6 +153,32 @@ fn camera_follow_player(
             //camera.translation = camera
             //    .translation
             //    .lerp(player.translation, time.delta().as_secs_f32() * LERP_SPEED);
+        }
+    }
+}
+
+fn woosh_chain(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    player: Single<&LinearVelocity, (With<Player>, Without<ChainLink>)>,
+    chain_links: Query<(&LinearVelocity, &Transform), (With<ChainLink>, Without<Player>)>,
+) {
+    for (link_velocity, link_pos) in chain_links {
+        let delta_v = link_velocity.0 - player.0;
+        let velocity = delta_v.length();
+        if velocity > 1000.0 {
+            commands.spawn((
+                Transform::from_translation(link_pos.translation),
+                Sprite {
+                    image: asset_server.load("ducky.png"),
+                    custom_size: Some(Vec2::new(10.0, 10.0)),
+                    ..Default::default()
+                },
+                RigidBody::Dynamic,
+                ExternalImpulse::new(delta_v / 2.0),
+                Mass(1.0),
+                DeleteAt::after(Duration::from_secs(5)),
+            ));
         }
     }
 }
