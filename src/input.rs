@@ -8,56 +8,56 @@ use crate::ChainBase;
 
 pub fn controls(
     keyboard: Res<ButtonInput<KeyCode>>,
-    mut player: Query<&mut TnuaController>,
-    mut gamepads: Query<&Gamepad>,
+    players: Query<&mut TnuaController>,
+    gamepads: Query<&Gamepad>,
     mut base: Query<&mut ChainBase>,
 ) {
-    let Ok(mut controller) = player.single_mut() else {
-        return;
-    };
+    let mut gamepads = gamepads.into_iter();
 
-    let mut direction = Vec3::ZERO;
-    if let Ok(gamepad) = gamepads.single_mut() {
-        if gamepad.pressed(GamepadButton::DPadLeft) {
-            direction -= Vec3::X;
+    for mut controller in players {
+        let mut direction = Vec3::ZERO;
+        if let Some(gamepad) = gamepads.next() {
+            if gamepad.pressed(GamepadButton::DPadLeft) {
+                direction -= Vec3::X;
+            }
+            if gamepad.pressed(GamepadButton::DPadRight) {
+                direction += Vec3::X;
+            }
+            if gamepad.pressed(GamepadButton::DPadUp) {
+                jump(&mut controller);
+            }
+            if gamepad.pressed(GamepadButton::DPadDown) {
+                slam(&mut controller);
+            }
+            if gamepad.right_stick().x > 0.8 {
+                base.iter_mut().for_each(|mut base| base.moveRight());
+            }
+            if gamepad.right_stick().x < -0.8 {
+                base.iter_mut().for_each(|mut base| base.moveLeft());
+            }
+        } else {
+            if keyboard.pressed(KeyCode::KeyA) {
+                direction -= Vec3::X;
+            }
+            if keyboard.pressed(KeyCode::KeyD) {
+                direction += Vec3::X;
+            }
+            if keyboard.pressed(KeyCode::Space) {
+                jump(&mut controller);
+            }
+            if keyboard.pressed(KeyCode::KeyS) {
+                slam(&mut controller);
+            }
+            if keyboard.pressed(KeyCode::ArrowRight) {
+                base.iter_mut().for_each(|mut base| base.moveRight());
+            }
+            if keyboard.pressed(KeyCode::ArrowLeft) {
+                base.iter_mut().for_each(|mut base| base.moveLeft());
+            }
         }
-        if gamepad.pressed(GamepadButton::DPadRight) {
-            direction += Vec3::X;
-        }
-        if gamepad.pressed(GamepadButton::DPadUp) {
-            jump(&mut controller);
-        }
-        if gamepad.pressed(GamepadButton::DPadDown) {
-            slam(&mut controller);
-        }
-        if gamepad.right_stick().x > 0.8 {
-            base.iter_mut().for_each(|mut base| base.moveRight());
-        }
-        if gamepad.right_stick().x < -0.8 {
-            base.iter_mut().for_each(|mut base| base.moveLeft());
-        }
-    } else {
-        if keyboard.pressed(KeyCode::KeyA) {
-            direction -= Vec3::X;
-        }
-        if keyboard.pressed(KeyCode::KeyD) {
-            direction += Vec3::X;
-        }
-        if keyboard.pressed(KeyCode::Space) {
-            jump(&mut controller);
-        }
-        if keyboard.pressed(KeyCode::KeyS) {
-            slam(&mut controller);
-        }
-        if keyboard.pressed(KeyCode::ArrowRight) {
-            base.iter_mut().for_each(|mut base| base.moveRight());
-        }
-        if keyboard.pressed(KeyCode::ArrowLeft) {
-            base.iter_mut().for_each(|mut base| base.moveLeft());
-        }
+
+        walk(controller, direction);
     }
-
-    walk(controller, direction);
 }
 
 fn walk(mut controller: Mut<'_, TnuaController>, direction: Vec3) {
