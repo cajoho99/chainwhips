@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
-mod helpers;
+pub mod helpers;
 
 pub fn setup(
     mut commands: Commands,
