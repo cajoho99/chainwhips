@@ -33,7 +33,14 @@ fn main() {
         .add_plugins(tilemap::helpers::tiled::TiledMapPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, tilemap::setup)
-        .add_systems(Update, (gamepad_system, keyboard_and_mouse_system))
+        .add_systems(
+            Update,
+            (
+                camera_follow_player,
+                gamepad_system,
+                keyboard_and_mouse_system,
+            ),
+        )
         .run();
 }
 
@@ -67,4 +74,15 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         LockedAxes::ROTATION_LOCKED,
         Player,
     ));
+}
+
+fn camera_follow_player(
+    players: Query<&Transform, (With<Player>, Without<Camera2d>)>,
+    cameras: Query<&mut Transform, (With<Camera2d>, Without<Player>)>,
+) {
+    if let Some(player) = players.into_iter().next() {
+        for mut camera in cameras {
+            camera.translation = player.translation;
+        }
+    }
 }
