@@ -20,7 +20,7 @@ atlas = ["bevy_ecs_tilemap/atlas"]
 
 [dependencies]
 avian2d = "0.3.0"
-bevy = "0.16"
+bevy = { version = "0.16", features = ["vorbis"] }
 bevy_ecs_tilemap = { version = "0.16.0" }
 thiserror = "2.0.12"
 tiled = "0.14.0"

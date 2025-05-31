@@ -33,14 +33,8 @@ fn main() {
         .add_plugins(tilemap::helpers::tiled::TiledMapPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, tilemap::setup)
-        .add_systems(
-            Update,
-            (
-                camera_follow_player,
-                gamepad_system,
-                keyboard_and_mouse_system,
-            ),
-        )
+        .add_systems(Update, (gamepad_system, keyboard_and_mouse_system))
+        .add_systems(Update, camera_follow_player)
         .run();
 }
 
@@ -48,6 +42,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2d);
 
     let player_scale = 0.1;
+
+    // DUCK
     commands.spawn((
         Transform::from_xyz(20.0, 0.0, 0.0).with_scale(Vec3::ONE * player_scale),
         Sprite {
@@ -60,6 +56,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Mass(1.0), // TODO
     ));
 
+    // Music
+    commands.spawn((
+        AudioPlayer::new(asset_server.load("ost.ogg")),
+        PlaybackSettings::LOOP,
+    ));
+
+    // Player
     commands.spawn((
         Transform::from_xyz(20.0, 0.1, 0.0).with_scale(Vec3::ONE * 0.1),
         Sprite {
@@ -79,10 +82,16 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn camera_follow_player(
     players: Query<&Transform, (With<Player>, Without<Camera2d>)>,
     cameras: Query<&mut Transform, (With<Camera2d>, Without<Player>)>,
+    _time: Res<Time>,
 ) {
     if let Some(player) = players.into_iter().next() {
         for mut camera in cameras {
             camera.translation = player.translation;
+
+            //const LERP_SPEED: f32 = 10.0;
+            //camera.translation = camera
+            //    .translation
+            //    .lerp(player.translation, time.delta().as_secs_f32() * LERP_SPEED);
         }
     }
 }
