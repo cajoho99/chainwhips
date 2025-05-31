@@ -9,6 +9,8 @@ mod cursed_mouse_input;
 mod input;
 mod tilemap;
 
+const GRAVITY: f32 = 980.0;
+
 #[derive(Component)]
 pub struct Player;
 
@@ -26,7 +28,7 @@ fn main() {
             //PhysicsDebugPlugin::default(),
         ))
         .init_asset::<TiledMap>()
-        .insert_resource(Gravity(Vec2::NEG_Y * 980.0))
+        .insert_resource(Gravity(Vec2::NEG_Y * GRAVITY))
         .add_plugins(TilemapPlugin)
         .add_plugins(tilemap::helpers::tiled::TiledMapPlugin)
         .add_systems(Startup, setup)
