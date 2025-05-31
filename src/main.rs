@@ -17,13 +17,32 @@ mod input;
 mod tilemap;
 
 const GRAVITY: f32 = 980.0;
-const CHAIN_LINK_COUNT: usize = 15;
+const CHAIN_LINK_COUNT: usize = 10;
 
 #[derive(Component)]
 pub struct Player;
 
 #[derive(Component)]
 pub struct ChainLink;
+
+#[derive(Component, Clone, Copy)]
+pub struct ChainBase {
+    pos: f32,
+}
+
+impl ChainBase {
+    pub fn moveLeft(&mut self) {
+        self.pos = f32::max(-1.0, self.pos - 0.1);
+    }
+    pub fn moveRight(&mut self) {
+        self.pos = f32::min(1.0, self.pos + 0.1);
+    }
+    pub fn getPos(self) -> Vec2 {
+        let orig = Vec2::new(0.0, 50.0);
+        let new = orig + Vec2::new(self.pos * 100.0, 0.0);
+        new
+    }
+}
 
 fn main() {
     App::new()
@@ -102,8 +121,23 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn spawn_chain(player: Entity, mut commands: Commands, asset_server: Res<AssetServer>) {
-    let mut chain_link = Vec::new();
-    for i in 0..CHAIN_LINK_COUNT {
+    let mut chain_link = vec![
+        commands
+            .spawn((
+                Transform::from_xyz(21.0, 500.1, 0.0).with_scale(Vec3::ONE * 0.1),
+                RigidBody::Dynamic,
+                ExternalImpulse::ZERO,
+                Collider::capsule(75.0, 80.0),
+                Sprite {
+                    image: asset_server.load("chain.png"),
+                    custom_size: Some(Vec2::new(100.0, 200.0)),
+                    ..Default::default()
+                },
+                Mass(0.001),
+            ))
+            .id(),
+    ];
+    for i in 1..CHAIN_LINK_COUNT {
         chain_link.push(
             commands
                 .spawn((
@@ -133,11 +167,12 @@ fn spawn_chain(player: Entity, mut commands: Commands, asset_server: Res<AssetSe
         );
     }
 
-    commands.spawn(
+    commands.spawn((
         RevoluteJoint::new(player, chain_link[0])
             .with_local_anchor_1(Vec2::new(0.0, 50.0))
             .with_local_anchor_2(Vec2::new(0.0, 10.0)),
-    );
+        ChainBase { pos: 0.0 },
+    ));
 }
 
 fn camera_follow_player(

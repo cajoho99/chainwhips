@@ -1,8 +1,10 @@
-use avian2d::prelude::ExternalImpulse;
+use std::ops::DerefMut;
+
+use avian2d::prelude::*;
 use bevy::{input::mouse::AccumulatedMouseMotion, prelude::*};
 use bevy_tnua::prelude::{TnuaBuiltinJump, TnuaBuiltinWalk, TnuaController};
 
-use crate::Player;
+use crate::{ChainBase, Player};
 
 pub fn gamepad_system(gamepads: Query<(Entity, &Gamepad)>) {
     for (entity, gamepad) in &gamepads {
@@ -28,6 +30,7 @@ pub fn keyboard_and_mouse_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mouse_input: Res<AccumulatedMouseMotion>,
     players: Query<&mut ExternalImpulse, With<Player>>,
+    bases: Single<(&mut ChainBase, &mut RevoluteJoint)>,
 ) {
     // if keyboard_input.just_pressed(KeyCode::KeyA) {
     //     info!("'A' just pressed");
@@ -38,6 +41,16 @@ pub fn keyboard_and_mouse_system(
 
     if mouse_input.delta != Vec2::ZERO {
         let delta = mouse_input.delta;
+
+        let (mut base, mut joint) = bases.into_inner();
+
+        if delta.x > 1.0 {
+            base.moveRight();
+        } else if delta.x < -1.0 {
+            base.moveLeft();
+        }
+        joint.local_anchor1 = base.getPos();
+
         info!("mouse moved ({}, {})", delta.x, delta.y);
     }
 
