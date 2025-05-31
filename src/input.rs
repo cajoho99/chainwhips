@@ -1,18 +1,18 @@
-use std::ops::DerefMut;
+use bevy::prelude::*;
+use bevy_tnua::{
+    builtins::TnuaBuiltinDash,
+    prelude::{TnuaBuiltinJump, TnuaBuiltinWalk, TnuaController},
+};
 
-use avian2d::prelude::*;
-use bevy::{input::mouse::AccumulatedMouseMotion, prelude::*};
-use bevy_tnua::prelude::{TnuaBuiltinJump, TnuaBuiltinWalk, TnuaController};
-
-use crate::{ChainBase, Player};
+use crate::ChainBase;
 
 pub fn controls(
     keyboard: Res<ButtonInput<KeyCode>>,
-    mut query: Query<&mut TnuaController>,
+    mut player: Query<&mut TnuaController>,
     mut gamepads: Query<&Gamepad>,
     mut base: Query<&mut ChainBase>,
 ) {
-    let Ok(mut controller) = query.single_mut() else {
+    let Ok(mut controller) = player.single_mut() else {
         return;
     };
 
@@ -26,6 +26,9 @@ pub fn controls(
         }
         if gamepad.pressed(GamepadButton::DPadUp) {
             jump(&mut controller);
+        }
+        if gamepad.pressed(GamepadButton::DPadDown) {
+            slam(&mut controller);
         }
         if gamepad.right_stick().x > 0.8 {
             base.iter_mut().for_each(|mut base| base.moveRight());
@@ -42,6 +45,15 @@ pub fn controls(
         }
         if keyboard.pressed(KeyCode::Space) {
             jump(&mut controller);
+        }
+        if keyboard.pressed(KeyCode::KeyS) {
+            slam(&mut controller);
+        }
+        if keyboard.pressed(KeyCode::ArrowRight) {
+            base.iter_mut().for_each(|mut base| base.moveRight());
+        }
+        if keyboard.pressed(KeyCode::ArrowLeft) {
+            base.iter_mut().for_each(|mut base| base.moveLeft());
         }
     }
 
@@ -72,5 +84,18 @@ fn jump(controller: &mut Mut<'_, TnuaController>) {
         height: 32.0 * 10.0,
         // `TnuaBuiltinJump` also has customization fields with sensible defaults.
         ..Default::default()
+    });
+}
+
+fn slam(controller: &mut Mut<'_, TnuaController>) {
+    controller.action(TnuaBuiltinDash {
+        displacement: -Vec3::Y * 1000.0,
+        desired_forward: None,
+        allow_in_air: true,
+        speed: 1000000.00,
+        brake_to_speed: 0.0, // TODO,
+        acceleration: 10000.0,
+        brake_acceleration: 100.0,
+        input_buffer_time: 0.0,
     });
 }
